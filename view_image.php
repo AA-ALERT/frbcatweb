@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 include ("frb_functions.inc.php");
 

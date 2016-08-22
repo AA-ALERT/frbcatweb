@@ -9,6 +9,10 @@
 <!-- ########################################## -->
 <!-- ############  START CONTENT  ############# -->
 
+<html>
+
+<body>
+
 <h1>FRB Catalogue</h1>
 
 <p>
@@ -16,8 +20,8 @@ This catalogue contains up to date information for the published population of F
 maintained by the FRBcat team and is updated as new sources are published or refined numbers become available.
 Information for each burst is divided into two categories: intrinsic properties measured using the available data, and
 derived parameters produced using a model. The intrinsic parameters should be taken as lower limits, as the position within
-the telescope beam is uncertain. Models used in this analysis are the NE2001 Galactic electron distribution (Cordes &amp; 
-Lazio, 2002), and the Cosmology Calculator (Wright, 2006). 
+the telescope beam is uncertain. Models used in this analysis are the NE2001 Galactic electron distribution (Cordes &amp;
+Lazio, 2002), and the Cosmology Calculator (Wright, 2006).
 </p>
 
 <p>
@@ -25,7 +29,8 @@ You may use the data presented in this catalogue for publications; however, we a
 (Petroff et al., 2016) and provide the url (http://www.astronomy.swin.edu.au/pulsar/frbcat/).
 </p>
 
-<?
+<?php
+
   include("frb_functions.inc.php");
 
   $link = db_connect();
@@ -49,7 +54,7 @@ You may use the data presented in this catalogue for publications; however, we a
   <th>Ref</th>
 </tr>
 
-<?
+<?php
 $keys = array_keys($frbs);
 $refs = array();
 $ref_idx = 0;
@@ -99,8 +104,8 @@ foreach ($keys as $id)
   if (!$in_array)
   {
     $ref_idx++;
-    $refs[$ref_idx] = array ("reference" => $frb["reference"], 
-                             "link" => $frb["link"], 
+    $refs[$ref_idx] = array ("reference" => $frb["reference"],
+                             "link" => $frb["link"],
                              "description" => $frb["description"]);
     $this_idx = $ref_idx;
   }
@@ -137,7 +142,7 @@ are added to the catalogue, or new cosmological/progenitor considerations become
   <th>Reference</th>
 </tr>
 
-<?
+<?php
 $keys = array_keys($refs);
 foreach ($keys as $idx)
 {
@@ -155,6 +160,8 @@ foreach ($keys as $idx)
 
 ?>
 </table>
+</body>
+</html>
 
 <!-- ############  END CONTENT    ############# -->
 <!-- ########################################## -->

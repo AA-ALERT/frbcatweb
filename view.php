@@ -1,7 +1,7 @@
-<?PHP
+<?php
 
 include ("frb_functions.inc.php");
-include ("../../admin/form_functions.inc.php");
+include ("../../admin/form_functions.inc.php"); // where is this php script?
 
 function renderField($title, $value, $units="")
 {
@@ -49,7 +49,7 @@ function renderFieldID($title, $value, $id, $units="")
 <!-- ########################################## -->
 <!-- ############  START CONTENT  ############# -->
 
-<?
+<?php
 
 $errors = array();
 
@@ -114,7 +114,7 @@ if ($frb_id > 0)
   echo "</td>\n";
   echo "</tr>\n";
   echo "</table>\n";
-  
+
   $js = "";
 
   foreach ($observations as $obs_idx => $o)
@@ -145,10 +145,10 @@ if ($frb_id > 0)
       $pointing_error_arcsecs = $rop["pointing_error"];
       $pointing_error_secs = round($pointing_error_arcsecs / 15);
       $pointing_error_degrees = $pointing_error_arcsecs / 3600;
-?>      
+?>
 <table class='standard' cellpadding=5px width='100%'>
   <tr><th colspan=3>Observation Parameters</th></tr>
-<?
+<?php
       renderField("Telescope", ucfirst($o["telescope"]));
       renderField("Receiver", $rop["receiver"]);
       renderField("Backend", $rop["backend"]);
@@ -164,7 +164,7 @@ if ($frb_id > 0)
       renderField("System Temperature", $rop["tsys"]);
 
       $ref = "";
-      if ($rop["reference"] != "") 
+      if ($rop["reference"] != "")
       {
         if ($rop["link"] != "")
         {
@@ -258,7 +258,7 @@ if ($frb_id > 0)
         renderField("Circular Poln Fraction", getQty($rmp["circular_poln_frac"], $rmp["circular_poln_frac_error"]));
         renderField("Host Photometric Redshift", getQty($rmp["z_phot"], $rmp["z_phot_error"]));
         renderField("Host Spectroscopic Redshift", getQty($rmp["z_spec"], $rmp["z_spec_error"]));
-        
+
         echo "</table>\n";
 
         $rmp_notes = getRadioMeasuredParamsNotes($link, $rmp["id"]);
@@ -366,8 +366,8 @@ if ($frb_id > 0)
   echo "[c] Galactic DM contribution derived from <a href='http://adsabs.harvard.edu/full/2004ASPC..317..211C'>NE2001: A New Model for the Galactic Electron Density and
 its Fluctuations</a>.<br/>\n";
   echo "[d] Model dependent errors on Galactic DM contribution due to [c] are not included in these parameters.<br/>\n";
-} 
-else 
+}
+else
 {
   echo "<p>ERROR: could not find FRBCAT record</p>\n";
 }

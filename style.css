@@ -1,0 +1,25 @@
+span.subsup {
+position: relative;
+}
+
+span.subsup sup {
+position: absolute;
+left: 0.3em;
+top: -0.4em;
+}
+
+span.subsup sub {
+position: absolute;
+left: 0.3em;
+bottom: -0.3em;
+}
+
+.obs_param {
+  position: relative;
+  margin-left: 20px;
+}
+
+.rmp {
+  position: relative;
+  margin-left: 20px;
+}

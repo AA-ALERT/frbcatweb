@@ -1,4 +1,4 @@
-<?PHP
+<?php
 
 if (!$_FRBS_FUNCTIONS_INC_PHP)
 {
@@ -28,58 +28,26 @@ function db_connect()
 function get_flat_table ($link)
 {
 
-  $qry = "select f.name, 
-       o.telescope, 
-       o.type,
-       o.utc,
-       rop.beam,
-       rop.receiver,
-       rop.backend,
-       rop.bandwidth,
-       rop.raj,
-       rop.decj,
-       rop.pointing_error,
-       rop.FWHM,
-       rop.sampling_time,
-       rop.bandwidth,
-       rop.centre_frequency,
-       rop.bits_per_sample,
-       rop.gain,
-       rop.tsys,
-       rop.ne2001_dm_limit,
-       rmp.dm, 
-       rmp.dm_error, 
-       rmp.snr, 
-       rmp.width, 
-       rmp.width_error_lower, 
-       rmp.width_error_upper, 
-       rmp.flux,
-       rmp.flux_error_lower, 
-       rmp.flux_error_upper,
-       rmp.dm_index,
-       rmp.dm_index_error,
-       rmp.scattering_index,
-       rmp.scattering_index_error,
-       rmp.scattering_time,
-       rmp.scattering_time_error,
-       rmp.linear_poln_frac,
-       rmp.linear_poln_frac_error,
-       rmp.circular_poln_frac,
-       rmp.circular_poln_frac_error,
-       rmp.z_phot,
-       rmp.z_phot_error,
-       rmp.z_spec,
-       rmp.z_spec_error,
-       r0.reference
-from frbs as f 
-join refs as r0 
-on (f.reference_id = r0.id)
-join observations as o 
-on (o.frb_id = f.id)
-join radio_obs_params as rop 
-on (rop.obs_id=o.id)
-join radio_measured_params as rmp
-on (rmp.obs_params_id = rop.id) where f.private=0 order by f.name";
+  // Change query to use frbs_have_refs
+  // Select for each FRBs only one reference to show (the one with the minimum reference id, which should be the first one to be added)
+  $qry = "select
+     f.name,
+     o.telescope,o.type,o.utc,
+     rop.beam,rop.receiver,rop.backend,rop.bandwidth,rop.raj,rop.decj,
+     rop.pointing_error,rop.FWHM,rop.sampling_time,rop.bandwidth,
+     rop.centre_frequency,rop.bits_per_sample,rop.gain,rop.tsys,rop.ne2001_dm_limit,
+     rmp.dm,rmp.dm_error,rmp.snr,rmp.width,rmp.width_error_lower,rmp.width_error_upper,
+     rmp.flux,rmp.flux_error_lower,rmp.flux_error_upper,rmp.dm_index,
+     rmp.dm_index_error,rmp.scattering_index,rmp.scattering_index_error,
+     rmp.scattering_time,rmp.scattering_time_error,rmp.linear_poln_frac,
+     rmp.linear_poln_frac_error,rmp.circular_poln_frac,rmp.circular_poln_frac_error,
+     rmp.z_phot,rmp.z_phot_error,rmp.z_spec,rmp.z_spec_error,
+     r0.reference
+from frbs f, refs r0,
+     (select frb_id,min(reference_id) as reference_id from frbs_have_refs group by frb_id) t,
+     observations o, radio_obs_params rop, radio_measured_params rmp
+where f.id = t.frb_id and t.reference_id = r0.id and f.id = o.frb_id and
+      o.id = rop.obs_id and rop.id = rmp.obs_params_id and f.private=0";
 
   $res = mysql_query($qry, $link);
   $records = array();
@@ -89,7 +57,7 @@ on (rmp.obs_params_id = rop.id) where f.private=0 order by f.name";
   }
 
   return $records;
-  
+
 }
 
 function calculate_derived_params ($frb)
@@ -222,53 +190,26 @@ function calculate_derived_params ($frb)
 
 }
 
-function getDBFields()
-{
-  $struct = getDBStructure();
-  $fields = array();
-
-  for ($i=0; $i<count($struct); $i++)
-  {
-    $i_keys = array_keys($struct[$i]);
-    $fields[$i] = $i_keys[0];
-  }
-  return $fields;
-}
-
-function getSelectList ($link, $name) 
-{
-  $list = array();
-  $res = 0;
-
-  if (($name == "reference") || ($name == "reference_id"))
-  {
-    $qry = "select id, reference from frb_references";
-    $res = mysql_query($qry, $link);
-    $name = "reference";
-  }
-
-  if ($name == "reference_url")
-  {
-    $qry = "select id, url from frb_references";
-    $res = mysql_query($qry, $link);
-    $name = "url";
-  }
-
-  if ($res)
-  {
-    for ($i=0; $i<mysql_numrows($res); $i++)
-    {
-      $list[mysql_result($res, $i, "id")] = mysql_result($res, $i, $name);
-    }
-  }
-
-  return $list;
-}
+// FUNCTION COMMENTED OUT FOR NOW SINCE IT IS UNUSED
+// function getDBFields()
+// {
+//   $struct = getDBStructure();
+//   $fields = array();
+//
+//   for ($i=0; $i<count($struct); $i++)
+//   {
+//     $i_keys = array_keys($struct[$i]);
+//     $fields[$i] = $i_keys[0];
+//   }
+//   return $fields;
+// }
 
 function getObservations ($link, $frb_id)
 {
   $observations = array();
-  $qry = "select f.name, o.utc, o.telescope, o.type, o.id, o.data_link from frbs as f join observations as o on (o.frb_id = f.id) where o.frb_id = '".$frb_id."' and f.private = 0";
+  $qry = "select f.name, o.utc, o.telescope, o.type, o.id, o.data_link
+          from frbs as f join observations as o on (o.frb_id = f.id)
+          where o.frb_id = '".$frb_id."' and f.private = 0";
   $res = mysql_query($qry, $link);
 
   for ($i=0; $i<mysql_numrows($res); $i++)
@@ -283,7 +224,13 @@ function getRadioObsParams ($link, $obs_id)
 {
   $records = array();
 
-  $qry = "select rop.*, r0.reference, r0.link from observations as o join refs as r0 on (o.reference_id = r0.id) join radio_obs_params as rop on (rop.obs_id=o.id) where o.id=".$obs_id;
+  // Use observations_have_refs table to get first reference only
+  $qry = "select rop.*, r0.reference, r0.link
+          from observations as o
+               join (select obs_id,min(reference_id) as reference_id from observations_have_refs group by obs_id) as t on (o.id = t.obs_id)
+               join refs as r0 on (t.reference_id = r0.id)
+               join radio_obs_params as rop on (rop.obs_id=o.id)
+          where o.id=".$obs_id;
 
   $res = mysql_query($qry, $link);
   for ($i=0; $i<mysql_numrows($res); $i++)
@@ -312,9 +259,13 @@ function getRadioMeasuredParams ($link, $rop_id)
 {
   $records = array();
 
-  $qry = "select rmp.*, refs.reference, refs.link from radio_measured_params as rmp ".
-          "left join refs on (rmp.reference_id = refs.id) ".
-          "where rmp.obs_params_id = '".$rop_id."'";
+  // Change to use radio_measured_params_have_refs but still get only one ref per rmp
+  $qry = "select rmp.*, refs.reference, refs.link
+          from radio_measured_params as rmp
+               join (select radio_measured_param_id,min(reference_id) as reference_id from radio_measured_params_have_refs group by radio_measured_param_id) as t on (rmp.id = t.radio_measured_param_id)
+               left join refs on (t.reference_id = refs.id)
+          where rmp.obs_params_id = ".$rop_id;
+
   $res = mysql_query($qry, $link);
   for ($i=0; $i<mysql_numrows($res); $i++)
   {
@@ -353,9 +304,14 @@ function getRadioImages($link, $rop_id)
 function getPublicRadioImage($link, $image_id)
 {
   # need to be sure that the image is public!
-  $qry = "select ri.image from radio_images as ri ".
-         "left join frbs as f on (ri.frb_id = f.id ) ".
-         "where f.private = 0 and ri.id= '".$image_id."'";
+   // Remote unnormalized columns require rewriting this sql query
+   $qry = "select ri.image
+           from radio_images as ri
+                left join radio_obs_params as rop on (ri.radio_obs_params_id = rop.id)
+                left join observations as o on (rop.obs_id = o.id)
+                left join frbs as f on (o.frb_id = f.id )
+           where f.private = 0 and ri.id= ".$image_id;
+
   $res = mysql_query($qry, $link);
   if (mysql_numrows($res) == 1)
   {
@@ -369,11 +325,15 @@ function getPublicRadioImage($link, $image_id)
 function getFRB($link, $id)
 {
   $frb = array();
-  $qry = "select f.name, f.utc, o.telescope, rop.*, r0.reference from frbs as f ".
-         "join observations as o on (o.frb_id = f.id) ".
-         "join refs as r0 on (o.reference_id = r0.id) ".
-         "join radio_obs_params as rop on (rop.obs_id=o.id) ".
-         "where f.private = 0 and f.id=".$id;
+
+  // Use frbs_have_refs but still get only one ref per frb
+  $qry = "select f.name, f.utc, o.telescope, rop.*, r0.reference
+          from frbs as f
+            join (select frb_id,min(reference_id) as reference_id from frbs_have_refs group by frb_id) as t on (f.id = t.frb_id)
+            join refs as r0 on (t.reference_id = r0.id)
+            join observations as o on (o.frb_id = f.id)
+            join radio_obs_params as rop on (rop.obs_id=o.id)
+          where f.private = 0 and f.id=".$id;
   $res = mysql_query($qry, $link);
 
   for ($i=0; $i<mysql_numrows($res); $i++)
@@ -397,23 +357,27 @@ function getFRBNotes($link, $id)
   return $notes;
 }
 
-
-function getObs($link, $id)
-{
-  $obs = array();
-  $qry = "select f.name,f.utc,rmp.*,r0.reference from frbs as f ".
-         "join observations as o on (o.frb_id = f.id) ".
-         "join radio_obs_params as rop on (rop.obs_id=o.id) ".
-         "join radio_measured_params as rmp on (rmp.obs_params_id = rop.id) ".
-         "join refs as r0 on (rmp.reference_id = r0.id) ".
-         "where f.private=0 and o.id=".$id;
-  $res = mysql_query($qry, $link);
-  if (mysql_numrows($res) == 1)
-  {
-    $obs = mysql_fetch_assoc($res);
-  }
-  return $obs;
-}
+// FUNCTION COMMENTED OUT FOR NOW SINCE IT IS UNUSED
+//
+// function getObs($link, $id)
+// {
+//   $obs = array();
+//   // Use the rmp_have_refs but still get only one ref
+//   $qry = "select f.name,f.utc,rmp.*,r0.reference
+//           from frbs as f
+//                join observations as o on (o.frb_id = f.id)
+//                join radio_obs_params as rop on (rop.obs_id=o.id)
+//                join radio_measured_params as rmp on (rmp.obs_params_id = rop.id)
+//                join (select radio_measured_param_id,min(reference_id) as reference_id from radio_measured_params_have_refs group by radio_measured_param_id) as t on (rmp.id = t.radio_measured_param_id)
+//                join refs as r0 on (t.reference_id = r0.id)
+//           where f.private=0 and o.id=".$id;
+//   $res = mysql_query($qry, $link);
+//   if (mysql_numrows($res) == 1)
+//   {
+//     $obs = mysql_fetch_assoc($res);
+//   }
+//   return $obs;
+// }
 
 function getObsNotes($link, $observation_id)
 {
@@ -421,7 +385,7 @@ function getObsNotes($link, $observation_id)
   $qry = "select * from observations_notes where observation_id=".$observation_id;
   $res = mysql_query($qry, $link);
   for ($i=0; $i<mysql_numrows($res); $i++)
-  { 
+  {
     $notes[$i] = mysql_fetch_assoc($res);
   }
   return $notes;
@@ -431,54 +395,33 @@ function getObsNotes($link, $observation_id)
 function readFRBs ($link)
 {
   $frbs = array();
-
-/*
-  $qry = "select f.id, f.name, o.telescope, TRUNCATE(rop.gl,3) as gl, 
-      TRUNCATE(rop.gb,3) as gb, TRUNCATE(rop.FWHM/60.0,2) as FWHM, 
-      rop.beam, rmp.dm, rmp.dm_error, rmp.snr, rmp.width, 
-      rmp.width_error_lower, rmp.width_error_upper, rmp.flux,
-      rmp.flux_prefix,rmp.flux_error_lower, rmp.flux_error_upper,r0.* 
-from frbs as f 
-join refs as r0 
-on (f.reference_id = r0.id)
-join observations as o 
+  // Replace query to use the frbs_have_refs table, still only list one ref per frb
+  $qry = "select f.id, f.name, o.telescope, TRUNCATE(rop.gl,3) as gl,
+    TRUNCATE(rop.gb,3) as gb, TRUNCATE(rop.FWHM/60.0,2) as FWHM,
+    rop.beam, rmp.dm, rmp.dm_error, rmp.snr, rmp.width,
+    rmp.width_error_lower, rmp.width_error_upper, rmp.flux,
+    rmp.flux_prefix, rmp.flux_error_lower, rmp.flux_error_upper,r0.*
+from frbs as f
+join (select frb_id,min(reference_id) as reference_id from frbs_have_refs group by frb_id) as t
+on (f.id = t.frb_id)
+join refs as r0
+on (t.reference_id = r0.id)
+join observations as o
 on (o.frb_id = f.id)
-join radio_obs_params as rop 
-on (rop.obs_id=o.id)
-join (
-      select dm,dm_error,snr,width,width_error_lower,
-             width_error_upper,flux,flux_prefix,flux_error_lower,
-             flux_error_upper,MIN(rank) as rank,obs_params_id
-      from radio_measured_params as rmp 
-      join frbs on (rmp.frb_id=frbs.id) 
-      group by frbs.id
-      ) rmp 
-on (rmp.obs_params_id = rop.id)
-where f.private=0 
-order by f.name;";
-*/
-
-  $qry = "select f.id, f.name, o.telescope, TRUNCATE(rop.gl,3) as gl, 
-      TRUNCATE(rop.gb,3) as gb, TRUNCATE(rop.FWHM/60.0,2) as FWHM, 
-      rop.beam, rmp.dm, rmp.dm_error, rmp.snr, rmp.width, 
-      rmp.width_error_lower, rmp.width_error_upper, rmp.flux,
-      rmp.flux_prefix, rmp.flux_error_lower, rmp.flux_error_upper,r0.* 
-from frbs as f 
-join refs as r0 
-on (f.reference_id = r0.id)
-join observations as o 
-on (o.frb_id = f.id)
-join radio_obs_params as rop 
+join radio_obs_params as rop
 on (rop.obs_id=o.id)
 join radio_measured_params as rmp on (rmp.obs_params_id = rop.id)
 inner join
 (
 select MIN(rank) as minrank,obs_params_id
-      from radio_measured_params
-      group by frb_id
+    from radio_measured_params rmp
+         join radio_obs_params rop on (rop.id = rmp.obs_params_id)
+         join observations o on (o.id = rop.obs_id)
+    group by o.frb_id
 ) rmp_b on (rmp_b.obs_params_id = rmp.obs_params_id) and (rmp_b.minrank=rmp.rank)
 where f.private=0
 order by f.name;";
+
 
   $res = mysql_query($qry, $link);
   if (!$res) {
@@ -518,8 +461,15 @@ order by f.name;";
 function readFRB ($link, $id)
 {
   $frbs = array();
+  // Change query to use observations_have_refs, but still use only one ref
+  $qry = "select f.name, o.telescope, rop.*, r0.reference
+          from frbs as f
+               join observations as o on (o.frb_id = f.id)
+               join (select obs_id,min(reference_id) as reference_id from observations_have_refs group by obs_id) as t on (o.id = t.obs_id)
+               join refs as r0 on (t.reference_id = r0.id)
+               join radio_obs_params as rop on (rop.obs_id=o.id)
+          where f.private = 0 and f.id=".$id;
 
-  $qry = "select f.name, o.telescope, rop.*, r0.reference from frbs as f join observations as o on (o.frb_id = f.id) join refs as r0 on (o.reference_id = r0.id) join radio_obs_params as rop on (rop.obs_id=o.id) where f.private = 0 and f.id=".$id;
 
   $res = mysql_query($qry, $link);
   if (!$res) {
@@ -557,49 +507,6 @@ function readFRB ($link, $id)
   return $frbs;
 }
 
-
-function readReferences($link)
-{
-  $refs = array();
-
-  $qry = "select * from frb_references order by id";
-  $res = mysql_query($qry, $link);
-
-  if (!$res) {
-    return $refs;
-  }
-
-  $nrows = mysql_numrows($res);
-
-  # get the field names
-  $fields = array();
-  if ($nrows > 0) {
-    $values = mysql_fetch_row($res);
-
-    # assume field 0 is the id
-    for ($i=1; $i<mysql_num_fields($res); $i++)
-      $fields[$i] = mysql_field_name($res, $i);
-
-    mysql_data_seek($res, 0);
-  }
-
-  for ($i=0; $i<$nrows; $i++) {
-    $values = mysql_fetch_row($res);
-    $id = $values[0];
-
-    if (!array_key_exists($id, $refs))
-      $refs[$id] = array();
-
-    for ($j=1; $j<mysql_num_fields($res); $j++) {
-
-      $refs[$id][$fields[$j]] = $values[$j];
-
-    }
-  }
-
-  return $refs;
-}
-
 function getQty($qty, $err)
 {
   // work out how many decimal places there are in the err
@@ -610,7 +517,7 @@ function getQty($qty, $err)
     $ndeci = floor(log10($err));
 
     if ($ndeci < 0)
-    { 
+    {
       $post = -1 * $ndeci;
       $pre  = strlen($qty) + 1 + $post;
       $format = "%".$pre.".".$post."f";
@@ -662,116 +569,119 @@ function getQtyErrors ($qty, $pos, $neg, $id="")
     return "error";
 }
 
+
+// FUNCTIONS COMMENTED OUT FOR NOW SINCE IT IS UNUSED
+
 #
 # Adds a new frb to the mysql database and to the CAS google calendar
 #
-function addFRB ($link, $new)
-{
-  $errors = array();
-
-  # check that all the required values have been set
-  $errors = checkFRBDetails ($new, $link);
-
-  if (count($errors) == 0)
-  {
-    # get list of database fields
-    $fields = getDBFields();
-
-    $qry = "insert into frbs (";
-    $qry .= implode(", ",$fields);
-    $qry .= ") values (";
-
-    $qry .= "'".$new[$fields[0]]."'";
-
-    for ($j=1; $j<count($fields); $j++) {
-      $qry .= ",'".$new[$fields[$j]]."'";
-    }
-    $qry .= ")";
-
-    # insert the new record into our database
-    $res = mysql_query($qry, $link);
-    if (!$res)
-    {
-      $errors["mysql"] = mysql_error();
-      echo "<p>Failed to add FRB</p>\n";
-    }
-  }
-
-  return $errors;
-}
-
-function editFRB($link, $new)
-{
-  $errors = array();
-
-  $id = $new["id"];
-  unset ($new["id"]);
-
-  $qry = "select * from frbs where id = ".$id;
-  $res = mysql_query($qry, $link);
-  if (!$res)
-  {
-    $errors["mysql"] = mysql_error();
-    return $errors;
-  }
-
-  if (mysql_numrows($res) != 1)
-  {
-    $errors["mysql"] = "Found more than 1 matching row";
-    return $errors;
-  }
-
-  # prepare mysql update query
-  $keys = array_keys($new);
-
-  $qry = "update frbs set";
-
-  $qry .= " ".$keys[0]." = '".$new[$keys[0]]."'";
-  for ($i=1; $i<count($keys); $i++)
-  {
-    if ($new[$keys[$i]] == "")
-      $qry .= ", ".$keys[$i]." = NULL";
-    else
-      $qry .= ", ".$keys[$i]." = '".$new[$keys[$i]]."'";
-  }
-  $qry .= " where id = ".$id;
-
-  $res = mysql_query($qry, $link);
-  if (!$res)
-    $errors["mysql"] = mysql_error();
-  return $errors;
-}
-
-function deleteFRB($link, $id_to_delete)
-{
-  $errors = array();
-
-  $qry = "select * from frbs where id = ".$id_to_delete;
-  $res = mysql_query($qry, $link);
-  if (!$res)
-  {
-    $errors["mysql"] = mysql_error();
-    return $errors;
-  }
-
-  if (mysql_num_rows($res) != 1)
-  {
-    $errors["mysql"] = "found more than 1 record with ID=".$id_to_delete;
-    return $errors;
-  }
-
-  $qry = "delete from frbs where id = ".$id_to_delete;
-  mysql_query($qry, $link);
-
-  return $errors;
-}
-
-function checkFRBDetails($new, $link) 
-{
-  $errors = array();
-  $struct = getDBStructure();
-
-  return $errors;
-}
+// function addFRB ($link, $new)
+// {
+//   $errors = array();
+//
+//   # check that all the required values have been set
+//   $errors = checkFRBDetails ($new, $link);
+//
+//   if (count($errors) == 0)
+//   {
+//     # get list of database fields
+//     $fields = getDBFields();
+//
+//     $qry = "insert into frbs (";
+//     $qry .= implode(", ",$fields);
+//     $qry .= ") values (";
+//
+//     $qry .= "'".$new[$fields[0]]."'";
+//
+//     for ($j=1; $j<count($fields); $j++) {
+//       $qry .= ",'".$new[$fields[$j]]."'";
+//     }
+//     $qry .= ")";
+//
+//     # insert the new record into our database
+//     $res = mysql_query($qry, $link);
+//     if (!$res)
+//     {
+//       $errors["mysql"] = mysql_error();
+//       echo "<p>Failed to add FRB</p>\n";
+//     }
+//   }
+//
+//   return $errors;
+// }
+//
+// function editFRB($link, $new)
+// {
+//   $errors = array();
+//
+//   $id = $new["id"];
+//   unset ($new["id"]);
+//
+//   $qry = "select * from frbs where id = ".$id;
+//   $res = mysql_query($qry, $link);
+//   if (!$res)
+//   {
+//     $errors["mysql"] = mysql_error();
+//     return $errors;
+//   }
+//
+//   if (mysql_numrows($res) != 1)
+//   {
+//     $errors["mysql"] = "Found more than 1 matching row";
+//     return $errors;
+//   }
+//
+//   # prepare mysql update query
+//   $keys = array_keys($new);
+//
+//   $qry = "update frbs set";
+//
+//   $qry .= " ".$keys[0]." = '".$new[$keys[0]]."'";
+//   for ($i=1; $i<count($keys); $i++)
+//   {
+//     if ($new[$keys[$i]] == "")
+//       $qry .= ", ".$keys[$i]." = NULL";
+//     else
+//       $qry .= ", ".$keys[$i]." = '".$new[$keys[$i]]."'";
+//   }
+//   $qry .= " where id = ".$id;
+//
+//   $res = mysql_query($qry, $link);
+//   if (!$res)
+//     $errors["mysql"] = mysql_error();
+//   return $errors;
+// }
+//
+// function deleteFRB($link, $id_to_delete)
+// {
+//   $errors = array();
+//
+//   $qry = "select * from frbs where id = ".$id_to_delete;
+//   $res = mysql_query($qry, $link);
+//   if (!$res)
+//   {
+//     $errors["mysql"] = mysql_error();
+//     return $errors;
+//   }
+//
+//   if (mysql_num_rows($res) != 1)
+//   {
+//     $errors["mysql"] = "found more than 1 record with ID=".$id_to_delete;
+//     return $errors;
+//   }
+//
+//   $qry = "delete from frbs where id = ".$id_to_delete;
+//   mysql_query($qry, $link);
+//
+//   return $errors;
+// }
+//
+// function checkFRBDetails($new, $link)
+// {
+//   $errors = array();
+//   $struct = getDBStructure();
+//
+//   return $errors;
+// }
 
 }// _FRBS_FUNCTIONS_INC_PHP

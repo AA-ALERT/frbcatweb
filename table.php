@@ -1,4 +1,4 @@
-<?
+<?php
 include("frb_functions.inc.php");
 
 $id = "all";
@@ -99,7 +99,7 @@ else
 {
   $output = rtrim($output, $sep)."\n";
 }
-  
+
 $frbkeys = array_keys($frbs);
 
 foreach ($frbkeys as $id)
