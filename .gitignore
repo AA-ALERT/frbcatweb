@@ -1,3 +1,8 @@
+db_secrets.txt
+setenv.sh
+.htaccess
+.htpasswd
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

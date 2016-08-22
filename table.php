@@ -56,7 +56,7 @@ $fields = array("name" => "Name",
                 "FWHM" => "FWHM",
                 "sampling_time" => "Sampling Time",
                 "bandwidth" => "Bandwidth",
-                "centre_frequnecy" => "Centre Frequnecy",
+                "centre_frequency" => "Centre Frequency",
                 "bits_per_sample" => "Bits per Sample",
                 "gain" => "Gain",
                 "tsys" => "System Temperature",
@@ -150,7 +150,8 @@ else if ($format == "votable")
   fwrite($fptr, $output);
   fclose($fptr);
 
-  $cmd = "export HOME=/home/ajameson; ./csv_to_vo_table.py ".$csv_file." ".$xml_file." 2>&1";
+  $cmd = "./run_csv_to_vo_table.sh ".$csv_file." ".$xml_file;
+
   $line = exec($cmd, $lines, $rval);
   if (DEBUG)
   {

@@ -1,10 +1,12 @@
 <?php
 
-if (!$_FRBS_FUNCTIONS_INC_PHP)
+if (!isset($_FRBS_FUNCTIONS_INC_PHP) ||  $_FRBS_FUNCTIONS_INC_PHP == null || !$_FRBS_FUNCTIONS_INC_PHP)
 {
   $_FRBS_FUNCTIONS_INC_PHP = 1;
 
-  define (DEBUG, false);
+  // define (DEBUG, false);
+  // TODO: use 'DEBUG' to avoid warning!
+  define ('DEBUG', false);
 
 function db_connect()
 {
@@ -66,6 +68,11 @@ function calculate_derived_params ($frb)
   $fluence_error_upper = "";
   $fluence_error_lower = "";
 
+  // Initialize values empty
+  $frb["fluence"] = "";
+  $frb["fluence_error_upper"] = "";
+  $frb["fluence_error_lower"] = "";
+
   if ($frb["width"] != "" && $frb["flux"] != "")
   {
     $width = floatval($frb["width"]);
@@ -93,8 +100,25 @@ function calculate_derived_params ($frb)
     }
   }
 
+  // TODO: Initialize to empty values
+  $frb["dm_excess"] = "";
+  $frb["dm_excess_error_upper"] = "";
+  $frb["dm_excess_error_lower"] = "";
+  $frb["redshift"] = "";
+  $frb["redshift_error_upper"] = "";
+  $frb["redshift_error_lower"] = "";
+
+  $frb["dist_luminosity"] = "";
+  $frb["dist_luminosity_error_upper"] = "";
+  $frb["dist_luminosity_error_lower"] = "";
+
+  $frb["energy"] = "";
+  $frb["energy_error_upper"] = "";
+  $frb["energy_error_lower"] = "";
+
   // if we have DM information
-  if ($frb["dm"] != "" && $frb["ne2001_dm_limit"] != "")
+  // TODO: ne2001_dm_limit is not queried so it is not available
+  if ($frb["dm"] != "" && in_array("ne2001_dm_limit", $frb) && $frb["ne2001_dm_limit"] != "")
   {
     $dm = floatval($frb["dm"]);
     $ne2001_dm_limit = floatval($frb["ne2001_dm_limit"]);
@@ -121,6 +145,7 @@ function calculate_derived_params ($frb)
       $frb["redshift_error_lower"] = number_format(abs($redshift_error_lower - $redshift),5);
 
       // depends on redshift
+      //TODO: dist_comoving is never there, so this if statement neves goes through
       if ($frb["dist_comoving"] != "")
       {
         $dist_comoving = floatval($frb["dist_comoving"]);
@@ -129,6 +154,7 @@ function calculate_derived_params ($frb)
           $dist_luminosity = $dist_comoving * (1 + $redshift);
           $frb["dist_luminosity"] = number_format ($dist_luminosity,2);
 
+          //TODO bandwidth is never there, so this if statement never goes through
           if ($frb["bandwidth"] != "")
           {
             $bandwidth = floatval($frb["bandwidth"]);
@@ -140,6 +166,7 @@ function calculate_derived_params ($frb)
             }
           }
 
+          //TODO: dist_comoving_error_upper and dist_comoving_error_lower are never there, so this if statement neves goes through
           if ($frb["dist_comoving_error_upper"] != "" && $frb["dist_comoving_error_lower"] != "")
           {
             $dist_comoving_error_upper = floatval($frb["dist_comoving_error_upper"]);
@@ -154,7 +181,8 @@ function calculate_derived_params ($frb)
 
               if ($frb["bandwidth"] != "")
               {
-                $bandwidth = floatval($frb["bandwidth"]);
+                //TODO already computed
+                // $bandwidth = floatval($frb["bandwidth"]);
                 if (is_float($bandwidth) && is_float($fluence))
                 {
                   $energy_error_upper = $fluence_error_upper * pow(10,-26) * 0.001 * pow(($dist_luminosity_error_upper * 3.08567758 * pow(10,25)),2) * $bandwidth * pow(10,6) * (1 + $redshfit_error_upper);
@@ -171,16 +199,17 @@ function calculate_derived_params ($frb)
             }
           }
 
-          if ($frb["bandwidth"] != "")
-          {
-            $bandwidth = floatval($frb["bandwidth"]);
-            if (is_float($bandwidth) && is_float($fluence))
-            {
-              $energy = $fluence  * pow(10,-26) * 0.001 * pow(($dist_luminosity * 3.08567758 * pow(10,25)),2) * $bandwidth * pow(10,6) * (1 + $redshfit);
-              $energy /= pow(10,32);
-              $frb["energy"] = number_format ($energy, 2);
-            }
-          }
+          // TODO this computation is duplicated!!
+          // if ($frb["bandwidth"] != "")
+          // {
+          //   $bandwidth = floatval($frb["bandwidth"]);
+          //   if (is_float($bandwidth) && is_float($fluence))
+          //   {
+          //     $energy = $fluence  * pow(10,-26) * 0.001 * pow(($dist_luminosity * 3.08567758 * pow(10,25)),2) * $bandwidth * pow(10,6) * (1 + $redshfit);
+          //     $energy /= pow(10,32);
+          //     $frb["energy"] = number_format ($energy, 2);
+          //   }
+          // }
         }
       }
     }
@@ -546,9 +575,9 @@ function renderQtyErrors($qty, $pos, $neg, $id="")
 
 function getQtyErrors ($qty, $pos, $neg, $id="")
 {
-  $qty_formatted = number_format($qty,2);
-  $neg_formatted = number_format($neg,2);
-  $pos_formatted = number_format($pos,2);
+  $qty_formatted = number_format(floatval($qty),2);
+  $neg_formatted = number_format(floatval($neg),2);
+  $pos_formatted = number_format(floatval($pos),2);
 
   //$qty_formatted = $qty;
   //$neg_formatted = $neg;
@@ -559,7 +588,7 @@ function getQtyErrors ($qty, $pos, $neg, $id="")
       return "<span>".$qty_formatted."</span><span class='subsup'><sup>+".$pos_formatted."</sup><sub>-".$neg_formatted."</sub></span>";
     else
       return "<span id='".$id."'>".$qty_formatted."</span><span class='subsup'><sup><span class='suppy' id='".$id."_error_upper'>+".$pos_formatted."</span></sup><sub><span class='subby' id='".$id."_error_lower'>-".$neg_formatted."</span></sub></span>";
-  else if (($pos == "") && ($$neg == ""))
+  else if (($pos == "") && ($neg == ""))
     return $qty_formatted;
   else if ($pos != "")
     return $qty_formatted." +".$pos_formatted;
