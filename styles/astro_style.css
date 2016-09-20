@@ -1,0 +1,165 @@
+/* CSS Document */
+
+td {
+
+vertical-align: top;
+}
+
+div#tile {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	z-index: 4;
+}
+
+#main_content {
+
+	position:relative;
+	padding: 15px;
+	margin: 0;
+	/* background: #F8F8F8; */
+}
+
+/* Fix Win-IE. Hide from Mac-IE \*/
+
+	* html #welcome_container {
+
+		padding: 20px 170px 2px 25px;
+	}
+
+	* html h2 {
+
+		padding: 4px 2px 2px 10px;
+		height: 1.7em;
+	}
+
+	* html .spacing {
+
+		/*font-size:1.4em;*/
+		font-size:1.85em;
+	}
+
+/* End */
+
+#news {
+	margin: 10px 0 10px 0;
+	padding: 0;
+	margin-bottom: 10px;
+}
+
+#news ul {
+
+	padding: 0;
+	margin: 0;
+	list-style-type: none;
+}
+
+#news ul li {
+
+	margin: 0;
+	background: white url('http://www.swinburne.edu.au/images/main_div.gif') bottom repeat-x;
+	padding: 2px 5px 6px 10px;
+	/*font-size: .7em;*/
+	font-size: 0.90em;
+}
+
+.spacing {
+
+	/*font-size:1.7em;*/
+	font-size: 2.3em;
+}
+
+.blue_border {
+
+	border: 1px solid #AECAE1;
+	margin: 0;
+}
+
+#academic_groups, #news, #prospective, #testimonials {
+
+	display: block;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	background: transparent;
+	background: url(../images/boxes/cool_blue_right.gif) repeat-x top right;
+}
+
+#academic_inner, #news_inner, #prospective_inner, #testimonials_inner {
+
+	background: white;
+}
+
+#prospective {
+
+	margin: 0 0 10px 0;
+	padding: 0;
+}
+#academic_groups {
+
+	margin: 10px 0 0 0;
+	padding: 0;
+}
+
+#prospective_inner {
+
+	padding: 0;
+	margin: 0;
+	position: relative;
+	display: block;
+}
+
+#news_testimonial_wrapper {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	padding: 0;
+	margin: 0;
+	width: 270px;
+	z-index: 3;
+}
+
+#prospective_academic_wrapper {
+
+	margin: 0 280px 0 0;
+	padding: 0;
+}
+
+.clearing {
+
+	display: block;
+	clear: both;
+	height: 1px;
+	margin: 0;
+	padding: 0;
+}
+
+#testimonials {
+
+	margin: 10px 0 10px 0;
+	padding: 0;
+	margin-bottom: 10px;
+	position: relative;
+}
+
+
+.arrow li {
+  margin: 0px 0px 0px 0px;
+  padding: 0px 2px 2px 0px;
+  list-style-image: url('/images/arrow5.gif');
+}
+
+.triangle li {
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  list-style-image: url('/images/arrow5.gif');
+}
+
+/* Styling of the menu */
+#left_menu {
+  margin: 0;
+  padding: 0;
+  width: 184px;
+  padding-bottom: 20px;
+  /*line-height: 1em;*/
+}

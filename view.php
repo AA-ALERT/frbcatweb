@@ -1,7 +1,7 @@
 <?php
 
 include ("frb_functions.inc.php");
-include ("../../admin/form_functions.inc.php"); // where is this php script?
+#include ("../../admin/form_functions.inc.php"); // where is this php script?
 
 function renderField($title, $value, $units="")
 {
@@ -50,6 +50,14 @@ function renderFieldID($title, $value, $id, $units="")
 <!-- ############  START CONTENT  ############# -->
 
 <?php
+
+echo "<link rel='stylesheet' type='text/css' href='styles/default.css' />";
+echo "<link rel='stylesheet' type='text/css' href='styles/main.css' />";
+echo "<link rel='stylesheet' type='text/css' href='styles/interim.css' />";
+echo "<link rel='stylesheet' type='text/css' href='styles/style.css' />";
+echo "<link rel='stylesheet' type='text/css' href='styles/astro_style.css' />";
+
+echo " <script type='text/javascript' src='js/cosmocalc.js'></script>";
 
 $errors = array();
 
@@ -231,8 +239,6 @@ if ($frb_id > 0)
           echo "<div class='rmp'>\n";
         }
 
-        //print_r($rmp);
-        $rmp["ne2001_dm_limit"] = $rop["ne2001_dm_limit"];
         $der = calculate_derived_params ($rmp);
 
         #######################################################################
@@ -322,11 +328,13 @@ if ($frb_id > 0)
       echo "<table class='standard' cellpadding=5px width='100%'>\n";
       echo "<tr><th>Data Products</th></tr>\n";
 
+      # TODO: change to use rmp
       $images = getRadioImages($link, $rop["id"]);
 
       $raw_data_link = "Not Available";
-      if (($frb["raw_data_url"] != "") && ($frb["raw_data_url"] != ""))
-        $raw_data_link = "<a href='".$frb["raw_data_url"]."'>Download</a>";
+      # TODO: raw_data_url not in frb or anywhere...maybe observation.data_link?
+#      if (($frb["raw_data_url"] != "") && ($frb["raw_data_url"] != ""))
+#        $raw_data_link = "<a href='".$frb["raw_data_url"]."'>Download</a>";
 
       foreach ($images as $img_idx => $img)
       {

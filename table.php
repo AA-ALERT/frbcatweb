@@ -4,7 +4,7 @@ include("frb_functions.inc.php");
 $id = "all";
 $link = db_connect();
 $frbs = get_flat_table($link);
-
+$sep = "";
 $format = "html";
 if (isset($_GET["format"]))
 {
@@ -29,11 +29,15 @@ if (isset($_GET["format"]))
       }
       else
       {
-        echo "ERROR: unrecognized seperator<BR>\n";
+        echo "ERROR: unrecognized separator<BR>\n";
         exit;
       }
     }
   }
+}
+else{
+  echo "ERROR: unspecified separator<BR>\n";
+  exit;
 }
 
 $output = "";
@@ -150,7 +154,7 @@ else if ($format == "votable")
   fwrite($fptr, $output);
   fclose($fptr);
 
-  $cmd = "./run_csv_to_vo_table.sh ".$csv_file." ".$xml_file;
+  $cmd = "./scripts/run_csv_to_vo_table.sh ".$csv_file." ".$xml_file;
 
   $line = exec($cmd, $lines, $rval);
   if (DEBUG)

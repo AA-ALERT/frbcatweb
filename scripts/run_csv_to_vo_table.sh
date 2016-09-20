@@ -5,4 +5,4 @@
 # astropy python package is available
 source setenv.sh
 
-./csv_to_vo_table.py $1 $2 2>&1
+./scripts/csv_to_vo_table.py $1 $2 2>&1
