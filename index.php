@@ -6,6 +6,8 @@
 <!--#set var="additional_head" value="/pulsar/frbcat/additional_head.html" -->
 <!--#include virtual="/siteheaders/header.html" -->
 
+
+
 <!-- ########################################## -->
 <!-- ############  START CONTENT  ############# -->
 
@@ -30,6 +32,11 @@ You may use the data presented in this catalogue for publications; however, we a
 </p>
 
 <?php
+  echo "<link rel='stylesheet' type='text/css' href='styles/default.css' />";
+  echo "<link rel='stylesheet' type='text/css' href='styles/main.css' />";
+  echo "<link rel='stylesheet' type='text/css' href='styles/interim.css' />";
+  echo "<link rel='stylesheet' type='text/css' href='styles/style.css' />";
+  echo "<link rel='stylesheet' type='text/css' href='styles/astro_style.css' />";
 
   include("frb_functions.inc.php");
 

@@ -4,7 +4,7 @@ include("frb_functions.inc.php");
 $id = "all";
 $link = db_connect();
 $frbs = get_flat_table($link);
-
+$sep = "";
 $format = "html";
 if (isset($_GET["format"]))
 {
@@ -29,11 +29,15 @@ if (isset($_GET["format"]))
       }
       else
       {
-        echo "ERROR: unrecognized seperator<BR>\n";
+        echo "ERROR: unrecognized separator<BR>\n";
         exit;
       }
     }
   }
+}
+else{
+  echo "ERROR: unspecified separator<BR>\n";
+  exit;
 }
 
 $output = "";
@@ -56,7 +60,7 @@ $fields = array("name" => "Name",
                 "FWHM" => "FWHM",
                 "sampling_time" => "Sampling Time",
                 "bandwidth" => "Bandwidth",
-                "centre_frequnecy" => "Centre Frequnecy",
+                "centre_frequency" => "Centre Frequency",
                 "bits_per_sample" => "Bits per Sample",
                 "gain" => "Gain",
                 "tsys" => "System Temperature",
@@ -150,7 +154,8 @@ else if ($format == "votable")
   fwrite($fptr, $output);
   fclose($fptr);
 
-  $cmd = "export HOME=/home/ajameson; ./csv_to_vo_table.py ".$csv_file." ".$xml_file." 2>&1";
+  $cmd = "./scripts/run_csv_to_vo_table.sh ".$csv_file." ".$xml_file;
+
   $line = exec($cmd, $lines, $rval);
   if (DEBUG)
   {

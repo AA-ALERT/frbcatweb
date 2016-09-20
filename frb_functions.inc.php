@@ -1,10 +1,22 @@
 <?php
 
-if (!$_FRBS_FUNCTIONS_INC_PHP)
+if (!isset($_FRBS_FUNCTIONS_INC_PHP) ||  $_FRBS_FUNCTIONS_INC_PHP == null || !$_FRBS_FUNCTIONS_INC_PHP)
 {
   $_FRBS_FUNCTIONS_INC_PHP = 1;
 
-  define (DEBUG, false);
+  // define (DEBUG, false);
+  // TODO: use 'DEBUG' to avoid warning!
+  define ('DEBUG', false);
+
+function debug_to_console( $data ) {
+
+    if ( is_array( $data ) )
+        $output = "<script>console.log( 'Debug Objects: " . implode( ',', $data) . "' );</script>";
+    else
+        $output = "<script>console.log( 'Debug Objects: " . $data . "' );</script>";
+
+    echo $output;
+}
 
 function db_connect()
 {
@@ -28,7 +40,7 @@ function db_connect()
 function get_flat_table ($link)
 {
 
-  // Change query to use frbs_have_refs
+  // Change query to use frbs_have_publications
   // Select for each FRBs only one reference to show (the one with the minimum reference id, which should be the first one to be added)
   $qry = "select
      f.name,
@@ -42,12 +54,12 @@ function get_flat_table ($link)
      rmp.scattering_time,rmp.scattering_time_error,rmp.linear_poln_frac,
      rmp.linear_poln_frac_error,rmp.circular_poln_frac,rmp.circular_poln_frac_error,
      rmp.z_phot,rmp.z_phot_error,rmp.z_spec,rmp.z_spec_error,
-     r0.reference
-from frbs f, refs r0,
-     (select frb_id,min(reference_id) as reference_id from frbs_have_refs group by frb_id) t,
-     observations o, radio_obs_params rop, radio_measured_params rmp
-where f.id = t.frb_id and t.reference_id = r0.id and f.id = o.frb_id and
-      o.id = rop.obs_id and rop.id = rmp.obs_params_id and f.private=0";
+     p.reference
+from frbs f, publications p,
+     (select frb_id,min(pub_id) as pub_id from frbs_have_publications group by frb_id) t,
+     observations o, radio_observations_params rop, radio_measured_params rmp
+where f.id = t.frb_id and t.pub_id = p.id and f.id = o.frb_id and
+      o.id = rop.obs_id and rop.id = rmp.rop_id and f.private=0";
 
   $res = mysql_query($qry, $link);
   $records = array();
@@ -65,6 +77,11 @@ function calculate_derived_params ($frb)
   $fluence = "";
   $fluence_error_upper = "";
   $fluence_error_lower = "";
+
+  // Initialize values empty
+  $frb["fluence"] = "";
+  $frb["fluence_error_upper"] = "";
+  $frb["fluence_error_lower"] = "";
 
   if ($frb["width"] != "" && $frb["flux"] != "")
   {
@@ -92,6 +109,24 @@ function calculate_derived_params ($frb)
       }
     }
   }
+
+  // TODO: Initialize to empty values
+  $frb["dm_excess"] = "";
+  $frb["dm_excess_error_upper"] = "";
+  $frb["dm_excess_error_lower"] = "";
+  $frb["redshift"] = "";
+  $frb["redshift_error_upper"] = "";
+  $frb["redshift_error_lower"] = "";
+
+  $frb["dist_luminosity"] = "";
+  $frb["dist_luminosity_error_upper"] = "";
+  $frb["dist_luminosity_error_lower"] = "";
+
+  $frb["energy"] = "";
+  $frb["energy_error_upper"] = "";
+  $frb["energy_error_lower"] = "";
+
+  debug_to_console( $frb["ne2001_dm_limit"] );
 
   // if we have DM information
   if ($frb["dm"] != "" && $frb["ne2001_dm_limit"] != "")
@@ -121,6 +156,7 @@ function calculate_derived_params ($frb)
       $frb["redshift_error_lower"] = number_format(abs($redshift_error_lower - $redshift),5);
 
       // depends on redshift
+      //TODO: dist_comoving is never there, so this if statement neves goes through
       if ($frb["dist_comoving"] != "")
       {
         $dist_comoving = floatval($frb["dist_comoving"]);
@@ -129,6 +165,7 @@ function calculate_derived_params ($frb)
           $dist_luminosity = $dist_comoving * (1 + $redshift);
           $frb["dist_luminosity"] = number_format ($dist_luminosity,2);
 
+          //TODO bandwidth is never there, so this if statement never goes through
           if ($frb["bandwidth"] != "")
           {
             $bandwidth = floatval($frb["bandwidth"]);
@@ -140,6 +177,7 @@ function calculate_derived_params ($frb)
             }
           }
 
+          //TODO: dist_comoving_error_upper and dist_comoving_error_lower are never there, so this if statement neves goes through
           if ($frb["dist_comoving_error_upper"] != "" && $frb["dist_comoving_error_lower"] != "")
           {
             $dist_comoving_error_upper = floatval($frb["dist_comoving_error_upper"]);
@@ -154,7 +192,8 @@ function calculate_derived_params ($frb)
 
               if ($frb["bandwidth"] != "")
               {
-                $bandwidth = floatval($frb["bandwidth"]);
+                //TODO already computed
+                // $bandwidth = floatval($frb["bandwidth"]);
                 if (is_float($bandwidth) && is_float($fluence))
                 {
                   $energy_error_upper = $fluence_error_upper * pow(10,-26) * 0.001 * pow(($dist_luminosity_error_upper * 3.08567758 * pow(10,25)),2) * $bandwidth * pow(10,6) * (1 + $redshfit_error_upper);
@@ -171,16 +210,17 @@ function calculate_derived_params ($frb)
             }
           }
 
-          if ($frb["bandwidth"] != "")
-          {
-            $bandwidth = floatval($frb["bandwidth"]);
-            if (is_float($bandwidth) && is_float($fluence))
-            {
-              $energy = $fluence  * pow(10,-26) * 0.001 * pow(($dist_luminosity * 3.08567758 * pow(10,25)),2) * $bandwidth * pow(10,6) * (1 + $redshfit);
-              $energy /= pow(10,32);
-              $frb["energy"] = number_format ($energy, 2);
-            }
-          }
+          // TODO this computation is duplicated!!
+          // if ($frb["bandwidth"] != "")
+          // {
+          //   $bandwidth = floatval($frb["bandwidth"]);
+          //   if (is_float($bandwidth) && is_float($fluence))
+          //   {
+          //     $energy = $fluence  * pow(10,-26) * 0.001 * pow(($dist_luminosity * 3.08567758 * pow(10,25)),2) * $bandwidth * pow(10,6) * (1 + $redshfit);
+          //     $energy /= pow(10,32);
+          //     $frb["energy"] = number_format ($energy, 2);
+          //   }
+          // }
         }
       }
     }
@@ -224,12 +264,12 @@ function getRadioObsParams ($link, $obs_id)
 {
   $records = array();
 
-  // Use observations_have_refs table to get first reference only
-  $qry = "select rop.*, r0.reference, r0.link
+  // Use observations_have_publications table to get first reference only
+  $qry = "select rop.*, p.reference, p.link
           from observations as o
-               join (select obs_id,min(reference_id) as reference_id from observations_have_refs group by obs_id) as t on (o.id = t.obs_id)
-               join refs as r0 on (t.reference_id = r0.id)
-               join radio_obs_params as rop on (rop.obs_id=o.id)
+               join (select obs_id,min(pub_id) as pub_id from observations_have_publications group by obs_id) as t on (o.id = t.obs_id)
+               join publications as p on (t.pub_id = p.id)
+               join radio_observations_params as rop on (rop.obs_id=o.id)
           where o.id=".$obs_id;
 
   $res = mysql_query($qry, $link);
@@ -244,7 +284,7 @@ function getRadioObsParams ($link, $obs_id)
 function getRadioObsParamsNotes($link, $id)
 {
   $notes = array();
-  $qry = "select * from radio_obs_params_notes where radio_obs_param_id=".$id;
+  $qry = "select * from radio_observations_params_notes where rop_id=".$id;
   $res = mysql_query($qry, $link);
 
   for ($i=0; $i<mysql_numrows($res); $i++)
@@ -259,12 +299,13 @@ function getRadioMeasuredParams ($link, $rop_id)
 {
   $records = array();
 
-  // Change to use radio_measured_params_have_refs but still get only one ref per rmp
-  $qry = "select rmp.*, refs.reference, refs.link
+  // Change to use radio_measured_params_have_publications but still get only one ref per rmp
+  $qry = "select rmp.*, rop.ne2001_dm_limit, p.reference, p.link
           from radio_measured_params as rmp
-               join (select radio_measured_param_id,min(reference_id) as reference_id from radio_measured_params_have_refs group by radio_measured_param_id) as t on (rmp.id = t.radio_measured_param_id)
-               left join refs on (t.reference_id = refs.id)
-          where rmp.obs_params_id = ".$rop_id;
+               join (select rmp_id,min(pub_id) as pub_id from radio_measured_params_have_publications group by rmp_id) as t on (rmp.id = t.rmp_id)
+               left join publications as p on (t.pub_id = p.id)
+               join radio_observations_params rop on (rop.id = rmp.rop_id)
+          where rmp.rop_id = ".$rop_id;
 
   $res = mysql_query($qry, $link);
   for ($i=0; $i<mysql_numrows($res); $i++)
@@ -277,7 +318,7 @@ function getRadioMeasuredParams ($link, $rop_id)
 function getRadioMeasuredParamsNotes($link, $id)
 {
   $notes = array();
-  $qry = "select * from radio_measured_params_notes where radio_measured_param_id=".$id;
+  $qry = "select * from radio_measured_params_notes where rmp_id=".$id;
   $res = mysql_query($qry, $link);
 
   for ($i=0; $i<mysql_numrows($res); $i++)
@@ -292,7 +333,10 @@ function getRadioImages($link, $rop_id)
 {
   $records = array();
 
-  $qry = "select ri.id, ri.title, ri.caption from radio_images as ri where ri.radio_obs_params_id = '".$rop_id."'";
+  $qry = "select distinct ri.id, ri.title, ri.caption
+          from radio_images ri, radio_images_have_radio_measured_params rihrmp, radio_measured_params rmp
+          where rmp.rop_id = '".$rop_id."' and rihrmp.rmp_id = rmp.id and rihrmp.radio_image_id = ri.id";
+
   $res = mysql_query($qry, $link);
   for ($i=0; $i<mysql_numrows($res); $i++)
   {
@@ -305,11 +349,13 @@ function getPublicRadioImage($link, $image_id)
 {
   # need to be sure that the image is public!
    // Remote unnormalized columns require rewriting this sql query
-   $qry = "select ri.image
+   $qry = "select distinct ri.image
            from radio_images as ri
-                left join radio_obs_params as rop on (ri.radio_obs_params_id = rop.id)
-                left join observations as o on (rop.obs_id = o.id)
-                left join frbs as f on (o.frb_id = f.id )
+                join radio_images_have_radio_measured_params rihrmp on (ri.id = rihrmp.radio_image_id)
+                join radio_measured_params as rmp on (rihrmp.rmp_id = rmp.id)
+                join radio_observations_params as rop on (rmp.rop_id = rop.id)
+                join observations as o on (rop.obs_id = o.id)
+                join frbs as f on (o.frb_id = f.id )
            where f.private = 0 and ri.id= ".$image_id;
 
   $res = mysql_query($qry, $link);
@@ -326,13 +372,13 @@ function getFRB($link, $id)
 {
   $frb = array();
 
-  // Use frbs_have_refs but still get only one ref per frb
-  $qry = "select f.name, f.utc, o.telescope, rop.*, r0.reference
+  // Use frbs_have_publications but still get only one ref per frb
+  $qry = "select f.name, f.utc, o.telescope, rop.*, p.reference
           from frbs as f
-            join (select frb_id,min(reference_id) as reference_id from frbs_have_refs group by frb_id) as t on (f.id = t.frb_id)
-            join refs as r0 on (t.reference_id = r0.id)
+            join (select frb_id,min(pub_id) as pub_id from frbs_have_publications group by frb_id) as t on (f.id = t.frb_id)
+            join publications as p on (t.pub_id = p.id)
             join observations as o on (o.frb_id = f.id)
-            join radio_obs_params as rop on (rop.obs_id=o.id)
+            join radio_observations_params as rop on (rop.obs_id=o.id)
           where f.private = 0 and f.id=".$id;
   $res = mysql_query($qry, $link);
 
@@ -362,14 +408,14 @@ function getFRBNotes($link, $id)
 // function getObs($link, $id)
 // {
 //   $obs = array();
-//   // Use the rmp_have_refs but still get only one ref
-//   $qry = "select f.name,f.utc,rmp.*,r0.reference
+//   // Use the rmp_have_publications but still get only one ref
+//   $qry = "select f.name,f.utc,rmp.*,p.reference
 //           from frbs as f
 //                join observations as o on (o.frb_id = f.id)
 //                join radio_obs_params as rop on (rop.obs_id=o.id)
 //                join radio_measured_params as rmp on (rmp.obs_params_id = rop.id)
-//                join (select radio_measured_param_id,min(reference_id) as reference_id from radio_measured_params_have_refs group by radio_measured_param_id) as t on (rmp.id = t.radio_measured_param_id)
-//                join refs as r0 on (t.reference_id = r0.id)
+//                join (select radio_measured_param_id,min(pub_id) as pub_id from radio_measured_params_have_publications group by radio_measured_param_id) as t on (rmp.id = t.radio_measured_param_id)
+//                join publications as p on (t.pub_id = p.id)
 //           where f.private=0 and o.id=".$id;
 //   $res = mysql_query($qry, $link);
 //   if (mysql_numrows($res) == 1)
@@ -382,7 +428,7 @@ function getFRBNotes($link, $id)
 function getObsNotes($link, $observation_id)
 {
   $notes = array();
-  $qry = "select * from observations_notes where observation_id=".$observation_id;
+  $qry = "select * from observations_notes where obs_id=".$observation_id;
   $res = mysql_query($qry, $link);
   for ($i=0; $i<mysql_numrows($res); $i++)
   {
@@ -395,30 +441,30 @@ function getObsNotes($link, $observation_id)
 function readFRBs ($link)
 {
   $frbs = array();
-  // Replace query to use the frbs_have_refs table, still only list one ref per frb
+  // Replace query to use the frbs_have_publications table, still only list one ref per frb
   $qry = "select f.id, f.name, o.telescope, TRUNCATE(rop.gl,3) as gl,
     TRUNCATE(rop.gb,3) as gb, TRUNCATE(rop.FWHM/60.0,2) as FWHM,
     rop.beam, rmp.dm, rmp.dm_error, rmp.snr, rmp.width,
     rmp.width_error_lower, rmp.width_error_upper, rmp.flux,
-    rmp.flux_prefix, rmp.flux_error_lower, rmp.flux_error_upper,r0.*
+    rmp.flux_prefix, rmp.flux_error_lower, rmp.flux_error_upper,p.*
 from frbs as f
-join (select frb_id,min(reference_id) as reference_id from frbs_have_refs group by frb_id) as t
+join (select frb_id,min(pub_id) as pub_id from frbs_have_publications group by frb_id) as t
 on (f.id = t.frb_id)
-join refs as r0
-on (t.reference_id = r0.id)
+join publications as p
+on (t.pub_id = p.id)
 join observations as o
 on (o.frb_id = f.id)
-join radio_obs_params as rop
+join radio_observations_params as rop
 on (rop.obs_id=o.id)
-join radio_measured_params as rmp on (rmp.obs_params_id = rop.id)
+join radio_measured_params as rmp on (rmp.rop_id = rop.id)
 inner join
 (
-select MIN(rank) as minrank,obs_params_id
+select MIN(rank) as minrank,rop_id
     from radio_measured_params rmp
-         join radio_obs_params rop on (rop.id = rmp.obs_params_id)
+         join radio_observations_params rop on (rop.id = rmp.rop_id)
          join observations o on (o.id = rop.obs_id)
     group by o.frb_id
-) rmp_b on (rmp_b.obs_params_id = rmp.obs_params_id) and (rmp_b.minrank=rmp.rank)
+) rmp_b on (rmp_b.rop_id = rmp.rop_id) and (rmp_b.minrank=rmp.rank)
 where f.private=0
 order by f.name;";
 
@@ -461,13 +507,13 @@ order by f.name;";
 function readFRB ($link, $id)
 {
   $frbs = array();
-  // Change query to use observations_have_refs, but still use only one ref
-  $qry = "select f.name, o.telescope, rop.*, r0.reference
+  // Change query to use observations_have_publications, but still use only one ref
+  $qry = "select f.name, o.telescope, rop.*, p.reference
           from frbs as f
                join observations as o on (o.frb_id = f.id)
-               join (select obs_id,min(reference_id) as reference_id from observations_have_refs group by obs_id) as t on (o.id = t.obs_id)
-               join refs as r0 on (t.reference_id = r0.id)
-               join radio_obs_params as rop on (rop.obs_id=o.id)
+               join (select obs_id,min(pub_id) as pub_id from observations_have_publications group by obs_id) as t on (o.id = t.obs_id)
+               join publications as p on (t.pub_id = p.id)
+               join radio_observations_params as rop on (rop.obs_id=o.id)
           where f.private = 0 and f.id=".$id;
 
 
@@ -546,9 +592,9 @@ function renderQtyErrors($qty, $pos, $neg, $id="")
 
 function getQtyErrors ($qty, $pos, $neg, $id="")
 {
-  $qty_formatted = number_format($qty,2);
-  $neg_formatted = number_format($neg,2);
-  $pos_formatted = number_format($pos,2);
+  $qty_formatted = number_format(floatval($qty),2);
+  $neg_formatted = number_format(floatval($neg),2);
+  $pos_formatted = number_format(floatval($pos),2);
 
   //$qty_formatted = $qty;
   //$neg_formatted = $neg;
@@ -559,7 +605,7 @@ function getQtyErrors ($qty, $pos, $neg, $id="")
       return "<span>".$qty_formatted."</span><span class='subsup'><sup>+".$pos_formatted."</sup><sub>-".$neg_formatted."</sub></span>";
     else
       return "<span id='".$id."'>".$qty_formatted."</span><span class='subsup'><sup><span class='suppy' id='".$id."_error_upper'>+".$pos_formatted."</span></sup><sub><span class='subby' id='".$id."_error_lower'>-".$neg_formatted."</span></sub></span>";
-  else if (($pos == "") && ($$neg == ""))
+  else if (($pos == "") && ($neg == ""))
     return $qty_formatted;
   else if ($pos != "")
     return $qty_formatted." +".$pos_formatted;

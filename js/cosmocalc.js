@@ -48,6 +48,8 @@ function computeEnergy (fluence, dl, bandwidth, z)
 // entry point for the input form to pass values back to this script
 function updateDerived (ident)
 {
+  console.log('1')
+
   var tH0 = parseFloat(document.getElementById('tH0').value);
   var tWM = parseFloat(document.getElementById('tWM').value);
   var tWV = parseFloat(document.getElementById('tWV').value);
@@ -78,7 +80,7 @@ function updateDerived (ident)
 
 
 // entry point for the input form to pass values back to this script
-function updateDerivedWithErrors (ident) 
+function updateDerivedWithErrors (ident)
 {
   var tH0 = parseFloat(document.getElementById('tH0').value);
   var tWM = parseFloat(document.getElementById('tWM').value);
@@ -224,7 +226,7 @@ function VCM() {
 }
 
 // calculate the actual results
-function compute() 
+function compute()
 {
   h = H0/100;
   WR = 4.165E-5/(h*h);  // includes 3 massless neutrino species, T0 = 2.72528

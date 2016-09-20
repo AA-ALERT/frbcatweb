@@ -1,0 +1,300 @@
+@import "//fonts.googleapis.com/css?family=Open+Sans:400,700";
+
+/* top nav */
+#navigation {
+    height: auto !important;
+	margin-bottom:0 !important;
+	overflow:auto;
+}
+body {
+    background: url("//www.swinburne.edu.au/images/2013/background-pattern.gif") repeat scroll 0 0 #F4F4F4 !important;
+}
+
+#navigation, #main, #footer {
+	background:none !important;
+}
+
+#nav_li_home {
+	float:left;
+	padding-left:6px;
+}
+
+#top_menu_top_row {
+	text-align:right;
+    margin: 0 auto;
+    padding: 0;
+    width: 987px;
+}
+#top_menu_top_row li {
+    border-width: 0 0 0 1px;
+	display:inline-block;
+    list-style-type: none;
+	*display: inline;
+    zoom: 1;
+}
+#top_menu_top_row li.first {
+    border-width: 0;
+}
+#top_menu_top_row li a, #nav_home {
+	text-transform: uppercase;
+    color: #555;
+    display: block;
+    font: 11px/22px "Arial",Arial,sans-serif;
+    height: 26px;
+    padding: 8px 9px 0;
+    text-align: center;
+    text-decoration: none;
+	width:auto;
+}
+#top_menu_top_row li a:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#top_menu_top_row li a.selected {
+	text-decoration:underline;
+}
+
+#top_menu_top_row li:first-child a {
+	padding-left:4px;
+}
+
+#top_menu_top_row li:last-child a {
+	padding-right:11px;
+}
+
+#top_menu_top_row li a.selected {
+	text-decoration:underline;
+}
+
+#top_menu_bottom_row {
+    margin: 0 auto;
+    overflow: auto;
+    padding: 0;
+    width: 987px;
+}
+#top_menu_bottom_row li {
+    list-style-type: none;
+    text-transform: uppercase;
+    float: left;
+}
+#top_menu_bottom_row li a {
+    display: block;
+    height: 32px;
+    padding: 0 12px;
+    text-align: center;
+    text-decoration: none;
+	color: #888;
+    font: bold 14px "Open Sans",Arial,sans-serif;
+}
+
+#top_menu_bottom_row li a:hover {
+    opacity:0.8;
+}
+
+#top_menu_bottom_row li:first-child a {
+	padding-left:11px;
+}
+
+#top_menu_bottom_row:last-child li a {
+    height: 40px;
+}
+
+#top_menu_bottom_row li a.selected {
+   /* background:url('//www.swinburne.edu.au/images/2013/bottom-nav-selected.png') transparent center bottom no-repeat;*/
+	color:#555;
+}
+
+#top_menu_bottom_row li #nav_industry.selected {
+    background:url('//www.swinburne.edu.au/images/2013/bottom-nav-selected-grey.png') transparent center bottom no-repeat;
+}
+
+/* Reposition logo */
+#banner p#banner-logo, #banners p#banner-logo, #banner-small p#banner-logo, #banner-small-no-back p#banner-logo {
+	margin-left:0 !important;
+	padding-left:0 !important;
+	/*border-left: 2px solid #000000 !important;
+    border-right: 2px solid #F21D00 !important;*/
+	padding-right:0 !important;
+}
+#wrapper, #wrapper-sidebar-small, #wrapper-sidebar {
+	width:988px;
+}
+
+
+
+/* second level menus */
+#international_menu, #futurestudents_menu, #research_menu {
+	text-align:center !important;
+	float:none !important;
+	background:#FFF !important;
+
+    clear: both !important;
+    margin: 0 auto !important;
+    padding-left: 0;
+	font-size: 12px !important;
+    list-style: none outside none !important;
+}
+#international_menu li, #futurestudents_menu li, #research_menu li {
+	float:none !important;
+	display:inline-block !important;
+	padding:0 !important;
+	*display: inline !important;
+    zoom: 1 !important;
+}
+#international_menu li a, #futurestudents_menu li a, #research_menu li a {
+    color: #666 !important;
+    display: block !important;
+    line-height: 22px !important;
+    padding: 5px 13px !important;
+    text-decoration: none !important;
+	width:auto !important;
+	font-family:Arial, Helvetica, sans-serif !important;
+	height: auto !important;
+}
+#international_menu li a:hover, #futurestudents_menu li a:hover, #research_menu li a:hover {
+    text-decoration: underline !important;
+}
+#international_menu em, #futurestudents_menu em, #research_menu em {
+	background:none !important;
+}
+#international_menu li a.selected, #futurestudents_menu li a.selected, #research_menu li a.selected {
+    text-decoration: underline !important;
+}
+
+#futurestudents_menu li a {
+	padding: 5px 10px !important;
+}
+
+#international_menu li a {
+	font-size:12px !important;
+	padding: 5px 11px !important;
+}
+
+
+
+/* main content area (centering and style) */
+#container {
+    margin: 0 auto;
+    width: 987px;
+}
+div#column {
+    border-left: 1px solid #FFFFFF;
+	border-bottom: 1px solid #FFFFFF;
+}
+
+/* Make banners grey */
+
+/*#banner-small p#pagetitle {
+	padding-left: 18px;
+	font-size: 26px !important;
+	color:#FFFFFF;
+	font-family: "Open Sans",Arial,sans-serif;
+	font-weight:bold;
+	height:auto;
+	padding-top:28px;
+	font-weight: normal;
+}
+
+#banner-small p#pagetitle span {
+	display:none;
+}
+
+
+#banner-small {
+	background:#555 !important;
+}
+
+
+#banner-small div#search {
+	background:#333 !important;
+}*/
+
+/* footer */
+#footer {
+	height: auto !important;
+	padding: 15px 0;
+	margin-top:0;
+}
+#foot {
+    background: none repeat scroll 0 0 transparent;
+    border-bottom: 1px solid #999;
+    border-top: 1px solid #999;
+    margin: 0 auto;
+    overflow: auto;
+    width: 967px;
+	padding:15px 10px 17px;
+}
+#foot ul {
+    list-style: none outside none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+#foot ul li {
+    border: medium none;
+    color: #666;
+    float: left;
+    font-family: 'Open Sans',sans-serif;
+    font-size: 0.9em;
+    height: 1em;
+    line-height: 1em;
+    margin: 4px 0;
+    padding: 0 8px;
+	border-right: 1px solid #999;
+}
+
+#foot ul li:last-child {
+	border-right: none;
+}
+#foot ul li a {
+    color: #666;
+}
+#foot ul li a, #bottom-nav ul li a {
+    text-decoration: none;
+}
+#foot ul li a:hover, #bottom-nav ul li a:hover {
+    text-decoration: underline;
+}
+#foot ul li:last-child a {
+	border-right:none;
+}
+
+/* CSS fix for quirksmode browsers */
+html.quirksmode #top_menu_top_row li, html.quirksmode #top_menu_bottom_row li {
+    zoom:auto !important;
+}
+html.quirksmode #top_menu_top_row li a, html.quirksmode #top_menu_bottom_row li a {
+    display: inline !important;
+}
+html.quirksmode #top_menu_top_row {
+	margin-top:7px;
+	margin-bottom:2px;
+}
+
+body.blank {
+background:#FFF !important;
+}
+
+/*Hide Site  Search*/
+
+#banner-small div#search,
+#banner-small-search div#search {
+ display:none;
+}
+
+#top_menu_bottom_row{
+	padding-bottom:10px;
+
+ }
+
+/*
+To push the landing page promo tiles up to fill the space left behind from the search box
+
+
+#wrapper-sidebar-small.landing-page div#sidecol {
+                border-left: 6px solid #FFFFFF;
+                position: relative;
+                top: -110px;
+}
+*/
